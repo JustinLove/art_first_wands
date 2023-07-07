@@ -9,22 +9,24 @@ end
 afw_unshuffle_wands = {}
 
 function afw_setup()
-	for w = 1,#wands do
-		afw_rate_wand( wands[w] )
-	end
+	if ModSettingGet('art_first_wands.bias_art_selection') then
+		for w = 1,#wands do
+			afw_rate_wand( wands[w] )
+		end
 
-	local function compare_wands(a, b)
-		return a.rating < b.rating
-	end
+		local function compare_wands(a, b)
+			return a.rating < b.rating
+		end
 
-	table.sort(wands, compare_wands)
+		table.sort(wands, compare_wands)
 
-	--[[
-	for i = 1,#wands,100 do
-		print(i, wands[i].rating)
+		--[[
+		for i = 1,#wands,100 do
+			print(i, wands[i].rating)
+		end
+		print(#wands, wands[#wands].rating)
+		]]
 	end
-	print(#wands, wands[#wands].rating)
-	]]
 
 	for w = 1,#wands do
 		local wand = wands[w]
@@ -202,23 +204,24 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 		force_unshuffle = true
 	end
 	local base_cost = gun['cost']
+	afw_log( 'initial cost----', gun['cost'])
 	local wand
-	local selectionValue = math.min(1.0, (base_cost - 30) / 90)
-	afw_log( 'initial cost----', gun['cost'], selectionValue )
-	if force_unshuffle then
-		local i = RandomDistribution( 1, #afw_unshuffle_wands, afw_unshuffle_wands*selectionValue, 2)
-		wand = afw_unshuffle_wands[i]
+	if ModSettingGet('art_first_wands.bias_art_selection') then
+		local selectionValue = math.min(1.0, (base_cost - 30) / 90)
+		if force_unshuffle then
+			local i = RandomDistribution( 1, #afw_unshuffle_wands, afw_unshuffle_wands*selectionValue, 2)
+			wand = afw_unshuffle_wands[i]
+		else
+			local i = RandomDistribution( 1, #wands, #wands*selectionValue, 2)
+			wand = wands[i]
+		end
 	else
-		local i = RandomDistribution( 1, #wands, #wands*selectionValue, 2)
-		wand = wands[i]
+		if force_unshuffle then
+			wand = afw_unshuffle_wands[Random(1, #afw_unshuffle_wands)]
+		else
+			wand = wands[Random(1, #wands)]
+		end
 	end
-	--[[
-	if force_unshuffle then
-		wand = afw_unshuffle_wands[Random(1, #afw_unshuffle_wands)]
-	else
-		wand = wands[Random(1, #wands)]
-	end
-	]]
 
 	afw_gun_from_wand( gun, wand )
 	gun["cost"] = math.floor( gun["cost"] * 0.3 + level * 9 )

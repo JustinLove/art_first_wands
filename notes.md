@@ -5,8 +5,10 @@
 - x lazy sorting
 - x cost instead of level?
 - settings
+  - x ranked
   - mana bias
   - enforce min mana
+  - debug settings?
 - steam image
 - readme
   - bbcode

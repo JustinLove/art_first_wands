@@ -59,7 +59,7 @@ end
 function afw_test( player_entity )
 	--EntitySetTransform( player_entity, 1540, 6050 )
 	--local x, y = EntityGetTransform( player_entity )
-	--test_wands_level()
+	test_wands_level()
 	--test_wands_unshuffle()
 	--test_wands_better()
 end
