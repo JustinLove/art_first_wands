@@ -1,6 +1,6 @@
 - x debug prints
 - x debug names
-- force unshuffle
+- x force unshuffle
 - prerank wands for level based matching
 - settings
   - mana bias

@@ -1,26 +1,33 @@
+local afw_print_logs = ModIsEnabled('EnableLogger')
+
+function afw_log( ... )
+	if afw_print_logs then
+		print( ... )
+	end
+end
+
+afw_unshuffle_wands = {}
+
+for w = 1,#wands do
+	local wand = wands[w]
+	if wand.shuffle_deck_when_empty == 0 then
+		afw_unshuffle_wands[#afw_unshuffle_wands+1] = wand
+	end
+end
+
+afw_log( 'unshuffle wands', #afw_unshuffle_wands, #wands )
+
 function afw_gun_from_wand( t_gun, wand )
 	local variable
+
+	-- other cost calculations depend on this
+	-- shuffle_deck_when_empty(value):   0  -  1 	/ 
+	t_gun["shuffle_deck_when_empty"] = wand["shuffle_deck_when_empty"]
 	-- fire_rate_wait:            0  -  4   / 1 - 30 (50)
 	t_gun["fire_rate_wait"] = 10 * wand["fire_rate_wait"] - 10
 	t_gun["fire_rate_wait"] = t_gun["fire_rate_wait"] + RandomDistribution( -10, 10, 0, 1)
 	t_gun["cost"] = t_gun["cost"] - ( 16 - t_gun["fire_rate_wait"] )
 	variable = "fire_rate_wait"
-	afw_log( variable, t_gun[variable], t_gun['cost'] )
-
-	-- shuffle_deck_when_empty:   0  -  1 	/ 
-	t_gun["shuffle_deck_when_empty"] = wand["shuffle_deck_when_empty"]
-	if( t_gun["shuffle_deck_when_empty"] == 1 ) then
-		if( t_gun["actions_per_round"] < 2 ) then
-			t_gun["cost"] = t_gun["cost"] + 60
-		else
-			t_gun["cost"] = t_gun["cost"] + 30
-			t_gun["cost"] = t_gun["cost"] - t_gun["actions_per_round"] * 10
-		end
-	else
-		-- cost is paid in increased slot cost
-		t_gun["cost"] = t_gun["cost"] - t_gun["actions_per_round"] * 5
-	end
-	variable = "shuffle_deck_when_empty"
 	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20 
@@ -48,6 +55,21 @@ function afw_gun_from_wand( t_gun, wand )
 	t_gun["actions_per_round"] = math.floor(clamp(t_gun["actions_per_round"], 1, cap))
 	variable = "actions_per_round"
 	afw_log( variable, t_gun[variable], t_gun['cost'], wand[variable] )
+
+	-- shuffle_deck_when_empty(cost):   0  -  1 	/ 
+	if( t_gun["shuffle_deck_when_empty"] == 1 ) then
+		if( t_gun["actions_per_round"] < 2 ) then
+			t_gun["cost"] = t_gun["cost"] + 60
+		else
+			t_gun["cost"] = t_gun["cost"] + 30
+			t_gun["cost"] = t_gun["cost"] - t_gun["actions_per_round"] * 10
+		end
+	else
+		-- cost is paid in increased slot cost
+		t_gun["cost"] = t_gun["cost"] - t_gun["actions_per_round"] * 5
+	end
+	variable = "shuffle_deck_when_empty"
+	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	-- spread_degrees:            0  -  2 	/ -5 - 10 / -35 - 35
 	t_gun["spread_degrees"] = 7 * wand["spread_degrees"] - 5
@@ -82,10 +104,10 @@ function afw_mana_sponge( t_gun )
 	local points = math.floor(t_gun["cost"] * fraction)
 	local offset = 50
 	if points < 0 then
-		t_gun["mana_charge_speed"] = clamp( offset + points*1.35, 10, 5000 )
+		t_gun["mana_charge_speed"] = math.floor(clamp( offset + points*1.35, 10, 5000 ))
 		t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_charge_speed"]-offset) / 1.35 )
 	else
-		t_gun["mana_charge_speed"] = clamp( offset + points*11, 10, 5000 )
+		t_gun["mana_charge_speed"] = math.floor(clamp( offset + points*11, 10, 5000 ))
 		t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_charge_speed"]-offset) / 11 )
 	end
 	variable = "mana_charge_speed"
@@ -116,13 +138,21 @@ function afw_wand_stats()
 	end
 end
 
-function afw_art_first_wand( gun, level, variables_01, variables_02, variables_03 )
+function afw_art_first_wand( gun, level, variables_01, variables_02, variables_03, force_unshuffle )
+	if GlobalsGetValue( "PERK_NO_MORE_SHUFFLE_WANDS", "0" ) == "1" then
+		force_unshuffle = true
+	end
 	local base_cost = gun['cost']
 	afw_log( 'initial cost----', gun['cost'] )
 	local wand
-	wand = wands[Random(1, #wands)]
+	if force_unshuffle then
+		wand = afw_unshuffle_wands[Random(1, #afw_unshuffle_wands)]
+	else
+		wand = wands[Random(1, #wands)]
+	end
+
 	afw_gun_from_wand( gun, wand )
-	gun["cost"] = gun["cost"] * 0.3 + level * 9
+	gun["cost"] = math.floor( gun["cost"] * 0.3 + level * 9 )
 	afw_mana_sponge( gun, wand )
 	afw_log( 'final cost', gun['cost'] )
 
@@ -152,12 +182,4 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	--gun["cost"] = 0
 	gun["wand"] = wand
 	return wand
-end
-
-local afw_print_logs = ModIsEnabled('EnableLogger')
-
-function afw_log( ... )
-	if afw_print_logs then
-		print( ... )
-	end
 end
