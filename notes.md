@@ -10,8 +10,7 @@
   - x debug settings?
   - mana bias
 - steam image
-- readme
-  - bbcode
+- x readme
 - starting wands?
 
 ### Other Mods
