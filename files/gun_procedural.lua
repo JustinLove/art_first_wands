@@ -160,7 +160,7 @@ function afw_mana_sponge( t_gun )
 	local fraction = Random()
 	afw_log( 'mana sponge in', t_gun['cost'] )
 	local points = math.floor(t_gun["cost"] * fraction)
-	local offset = 50
+	local offset = 10
 	local minimum = tonumber(ModSettingGet('art_first_wands.min_mana_charge_speed')) or 10
 	if points < 0 then
 		t_gun["mana_charge_speed"] = math.floor(clamp( offset + points*1.35, minimum, 5000 ))
@@ -173,7 +173,7 @@ function afw_mana_sponge( t_gun )
 	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	local points = t_gun["cost"]
-	local offset = 200
+	local offset = 50
 	local minimum = tonumber(ModSettingGet('art_first_wands.min_mana_max')) or 50
 	t_gun["mana_max"] = math.floor(clamp( offset + points*35, minimum,  6000 ))
 	t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_max"]-offset) / 35 )
@@ -208,7 +208,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 		force_unshuffle = true
 	end
 	local base_cost = gun['cost']
-	afw_log( 'initial cost----', gun['cost'])
+	afw_log( 'initial cost----', base_cost)
 	local wand
 	if ModSettingGet('art_first_wands.bias_art_selection') then
 		local selectionValue = math.min(1.0, (base_cost - 30) / 90)
@@ -228,9 +228,12 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	end
 
 	afw_gun_from_wand( gun, wand )
+	local art_cost = math.floor(gun["cost"])
 	gun["cost"] = math.floor( gun["cost"] * 0.3 + level * 9 )
+	local mana_setup = gun["cost"]
 	afw_mana_sponge( gun, wand )
-	afw_log( 'final cost', gun['cost'] )
+	local final_cost = gun["cost"]
+	afw_log( 'final cost', base_cost, art_cost, mana_setup, final_cost)
 
 	while #variables_01 > 0 do
 		table.remove(variables_01)
@@ -254,7 +257,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 			if ModSettingGet('art_first_wands.bias_art_selection') then
 				rating = string.format(" %0.2f", wand.rating)
 			end
-			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", gun["cost"], rating }) )
+			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", base_cost, " ", art_cost, " ", mana_setup, " ", final_cost, " ", rating }) )
 			--ComponentSetValue2( item, "item_name", table.concat({'Level ', tostring(level), rare }) )
 			ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 		end
