@@ -202,17 +202,14 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 		force_unshuffle = true
 	end
 	local base_cost = gun['cost']
-	afw_log( 'initial cost----', gun['cost'] )
 	local wand
-	local selectionLevel = level - 1
-	if gun["is_rare"] then
-		selectionLevel = selectionLevel + 1
-	end
+	local selectionValue = math.min(1.0, (base_cost - 30) / 90)
+	afw_log( 'initial cost----', gun['cost'], selectionValue )
 	if force_unshuffle then
-		local i = RandomDistribution( 1, #afw_unshuffle_wands, math.min(#afw_unshuffle_wands, #afw_unshuffle_wands*selectionLevel/6), 2)
+		local i = RandomDistribution( 1, #afw_unshuffle_wands, afw_unshuffle_wands*selectionValue, 2)
 		wand = afw_unshuffle_wands[i]
 	else
-		local i = RandomDistribution( 1, #wands, math.min(#wands, #wands*selectionLevel/6), 2)
+		local i = RandomDistribution( 1, #wands, #wands*selectionValue, 2)
 		wand = wands[i]
 	end
 	--[[

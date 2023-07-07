@@ -3,7 +3,7 @@
 - x force unshuffle
 - x prerank wands for level based matching
 - x lazy sorting
-- cost instead of level?
+- x cost instead of level?
 - settings
   - mana bias
   - enforce min mana
