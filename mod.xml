@@ -1,0 +1,6 @@
+<Mod
+	name="Art First Wands"
+	description="Generates stats based on random wand art, instead of picking the art based on stats."
+	request_no_api_restrictions="0" 
+> 
+</Mod>
