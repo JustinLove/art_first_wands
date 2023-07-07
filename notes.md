@@ -2,7 +2,7 @@
 - x debug names
 - x force unshuffle
 - x prerank wands for level based matching
-- lazy sorting
+- x lazy sorting
 - cost instead of level?
 - settings
   - mana bias

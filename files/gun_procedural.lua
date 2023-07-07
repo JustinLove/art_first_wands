@@ -8,6 +8,34 @@ end
 
 afw_unshuffle_wands = {}
 
+function afw_setup()
+	for w = 1,#wands do
+		afw_rate_wand( wands[w] )
+	end
+
+	local function compare_wands(a, b)
+		return a.rating < b.rating
+	end
+
+	table.sort(wands, compare_wands)
+
+	--[[
+	for i = 1,#wands,100 do
+		print(i, wands[i].rating)
+	end
+	print(#wands, wands[#wands].rating)
+	]]
+
+	for w = 1,#wands do
+		local wand = wands[w]
+		if wand.shuffle_deck_when_empty == 0 then
+			afw_unshuffle_wands[#afw_unshuffle_wands+1] = wand
+		end
+	end
+
+	afw_log( 'unshuffle wands', #afw_unshuffle_wands, #wands )
+end
+
 function afw_rate_wand( wand )
 	local variable
 	local rating = 0
@@ -167,6 +195,9 @@ function afw_wand_stats()
 end
 
 function afw_art_first_wand( gun, level, variables_01, variables_02, variables_03, force_unshuffle )
+	if #afw_unshuffle_wands < 1 then
+		afw_setup()
+	end
 	if GlobalsGetValue( "PERK_NO_MORE_SHUFFLE_WANDS", "0" ) == "1" then
 		force_unshuffle = true
 	end
@@ -224,29 +255,3 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	gun["wand"] = wand
 	return wand
 end
-
-for w = 1,#wands do
-	afw_rate_wand( wands[w] )
-end
-
-local function compare_wands(a, b)
-	return a.rating < b.rating
-end
-
-table.sort(wands, compare_wands)
-
---[[
-for i = 1,#wands,100 do
-	print(i, wands[i].rating)
-end
-print(#wands, wands[#wands].rating)
-]]
-
-for w = 1,#wands do
-	local wand = wands[w]
-	if wand.shuffle_deck_when_empty == 0 then
-		afw_unshuffle_wands[#afw_unshuffle_wands+1] = wand
-	end
-end
-
-afw_log( 'unshuffle wands', #afw_unshuffle_wands, #wands )
