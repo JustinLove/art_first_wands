@@ -255,6 +255,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 				rating = string.format(" %0.2f", wand.rating)
 			end
 			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", gun["cost"], rating }) )
+			--ComponentSetValue2( item, "item_name", table.concat({'Level ', tostring(level), rare }) )
 			ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 		end
 	end

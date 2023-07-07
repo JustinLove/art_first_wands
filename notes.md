@@ -9,7 +9,7 @@
   - x enforce min mana
   - x debug settings?
   - mana bias
-- steam image
+- x steam image
 - x readme
 - starting wands?
 
