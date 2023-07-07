@@ -161,11 +161,12 @@ function afw_mana_sponge( t_gun )
 	afw_log( 'mana sponge in', t_gun['cost'] )
 	local points = math.floor(t_gun["cost"] * fraction)
 	local offset = 50
+	local minimum = tonumber(ModSettingGet('art_first_wands.min_mana_charge_speed')) or 10
 	if points < 0 then
-		t_gun["mana_charge_speed"] = math.floor(clamp( offset + points*1.35, 10, 5000 ))
+		t_gun["mana_charge_speed"] = math.floor(clamp( offset + points*1.35, minimum, 5000 ))
 		t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_charge_speed"]-offset) / 1.35 )
 	else
-		t_gun["mana_charge_speed"] = math.floor(clamp( offset + points*11, 10, 5000 ))
+		t_gun["mana_charge_speed"] = math.floor(clamp( offset + points*11, minimum, 5000 ))
 		t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_charge_speed"]-offset) / 11 )
 	end
 	variable = "mana_charge_speed"
@@ -173,7 +174,8 @@ function afw_mana_sponge( t_gun )
 
 	local points = t_gun["cost"]
 	local offset = 200
-	t_gun["mana_max"] = math.floor(clamp( offset + points*35, 50, 6000 ))
+	local minimum = tonumber(ModSettingGet('art_first_wands.min_mana_max')) or 50
+	t_gun["mana_max"] = math.floor(clamp( offset + points*35, minimum,  6000 ))
 	t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_max"]-offset) / 35 )
 	variable = "mana_max"
 	afw_log( 'mana_max       ', t_gun[variable], t_gun['cost'] )
@@ -209,7 +211,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	if ModSettingGet('art_first_wands.bias_art_selection') then
 		local selectionValue = math.min(1.0, (base_cost - 30) / 90)
 		if force_unshuffle then
-			local i = RandomDistribution( 1, #afw_unshuffle_wands, afw_unshuffle_wands*selectionValue, 2)
+			local i = RandomDistribution( 1, #afw_unshuffle_wands, #afw_unshuffle_wands*selectionValue, 2)
 			wand = afw_unshuffle_wands[i]
 		else
 			local i = RandomDistribution( 1, #wands, #wands*selectionValue, 2)

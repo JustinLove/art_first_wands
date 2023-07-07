@@ -7,9 +7,31 @@ mod_settings =
 	{
 		id = "bias_art_selection",
 		ui_name = "Bias Art Selection",
-		ui_description = "Try to pick art somewhat appopriate to the wand level.\nOtherwise, art is completely random and mana will likely be wild to make up for it.",
+		ui_description = "Try to pick art somewhat appopriate to the wand level.\nOtherwise, art is completely random and mana will likely be wild to make up for it.\nRequires restart.",
 		value_default = true,
 		scope = MOD_SETTING_SCOPE_RUNTIME_RESTART,
+	},
+	{
+		category_id = "min_mana",
+		ui_name = "Minimum Mana",
+		settings = {
+			{
+				id = "min_mana_max",
+				ui_name = "Mana max",
+				ui_description = "The lowest allowed level of mana storage",
+				value_default = "50",
+				values = { {"150", "150"}, {"100", "100"}, {"50","50"}, {"30", "30"}, {"10", "10"}, {"5","5"}, {"2", "2"}, {"0", "0"} },
+				scope = MOD_SETTING_SCOPE_RUNTIME,
+			},
+			{
+				id = "min_mana_charge_speed",
+				ui_name = "Mana chg. Spd",
+				ui_description = "The lowest allowed level of manage charge speed",
+				value_default = "10",
+				values = { {"50","50"}, {"30", "30"}, {"10", "10"}, {"5","5"}, {"1", "1"}, {"0", "0"} },
+				scope = MOD_SETTING_SCOPE_RUNTIME,
+			},
+		},
 	},
 }
 
