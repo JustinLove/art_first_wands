@@ -1,14 +1,16 @@
 - x debug prints
 - x debug names
 - x force unshuffle
-- prerank wands for level based matching
+- x prerank wands for level based matching
+- lazy sorting
+- cost instead of level?
 - settings
   - mana bias
   - enforce min mana
-- starting wands?
 - steam image
 - readme
   - bbcode
+- starting wands?
 
 ### Other Mods
 - More Stuff has special wands

@@ -8,14 +8,42 @@ end
 
 afw_unshuffle_wands = {}
 
-for w = 1,#wands do
-	local wand = wands[w]
-	if wand.shuffle_deck_when_empty == 0 then
-		afw_unshuffle_wands[#afw_unshuffle_wands+1] = wand
-	end
-end
+function afw_rate_wand( wand )
+	local variable
+	local rating = 0
 
-afw_log( 'unshuffle wands', #afw_unshuffle_wands, #wands )
+	-- fire_rate_wait:            0  -  4   / 1 - 30 (50)
+	rating = rating + (wand["fire_rate_wait"] / 4) * -0.5
+
+	-- shuffle_deck_when_empty(cost):   0  -  1 	/ 
+	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20 
+	local cap = math.floor(math.pow(0.68*wand["deck_capacity"], 2)) + 2
+	if( wand["shuffle_deck_when_empty"] == 0 ) then
+		rating = rating + (cap / 26) * 3.0
+	else
+		rating = rating + ((cap - 6) / 26) * 1.0
+	end
+
+	-- actions_per_round:         0  -  2 	/  1 - 3
+	rating = rating + (wand["actions_per_round"] / 2) * 0.5
+
+	-- spread_degrees:            0  -  2 	/ -5 - 10 / -35 - 35
+	rating = rating + (wand["spread_degrees"] / 7) * -0.5
+
+	-- reload_time:               0  -  2 	/ 5 - 100
+	rating = rating + (wand["reload_time"] / 2) * -1.0
+	local rel = wand["reload_time"]
+	if rel == 0 then
+		rating = rating + 0.5
+	elseif rel == 1 then
+		rating = rating + -0.5
+	else
+		rating = rating + -2.0
+	end
+
+	wand.rating = rating
+	return rating
+end
 
 function afw_gun_from_wand( t_gun, wand )
 	local variable
@@ -42,7 +70,7 @@ function afw_gun_from_wand( t_gun, wand )
 	variable = "deck_capacity"
 	afw_log( variable, t_gun[variable], t_gun['cost'], wand[variable] )
 
-	-- actions_per_round:         0  -  2 	/  1 - 3	
+	-- actions_per_round:         0  -  2 	/  1 - 3
 	local cap = t_gun['deck_capacity']
 	local actions = wand["actions_per_round"]
 	if actions == 0 then
@@ -145,11 +173,24 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	local base_cost = gun['cost']
 	afw_log( 'initial cost----', gun['cost'] )
 	local wand
+	local selectionLevel = level - 1
+	if gun["is_rare"] then
+		selectionLevel = selectionLevel + 1
+	end
+	if force_unshuffle then
+		local i = RandomDistribution( 1, #afw_unshuffle_wands, math.min(#afw_unshuffle_wands, #afw_unshuffle_wands*selectionLevel/6), 2)
+		wand = afw_unshuffle_wands[i]
+	else
+		local i = RandomDistribution( 1, #wands, math.min(#wands, #wands*selectionLevel/6), 2)
+		wand = wands[i]
+	end
+	--[[
 	if force_unshuffle then
 		wand = afw_unshuffle_wands[Random(1, #afw_unshuffle_wands)]
 	else
 		wand = wands[Random(1, #wands)]
 	end
+	]]
 
 	afw_gun_from_wand( gun, wand )
 	gun["cost"] = math.floor( gun["cost"] * 0.3 + level * 9 )
@@ -174,7 +215,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 			if gun["is_rare"] == 1 then
 				rare = 'r'
 			end
-			ComponentSetValue2( item, "item_name", tostring(level) .. rare .. " " .. gun["cost"] )
+			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", gun["cost"], string.format(" %0.2f", wand.rating) }) )
 			ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 		end
 	end
@@ -183,3 +224,29 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	gun["wand"] = wand
 	return wand
 end
+
+for w = 1,#wands do
+	afw_rate_wand( wands[w] )
+end
+
+local function compare_wands(a, b)
+	return a.rating < b.rating
+end
+
+table.sort(wands, compare_wands)
+
+--[[
+for i = 1,#wands,100 do
+	print(i, wands[i].rating)
+end
+print(#wands, wands[#wands].rating)
+]]
+
+for w = 1,#wands do
+	local wand = wands[w]
+	if wand.shuffle_deck_when_empty == 0 then
+		afw_unshuffle_wands[#afw_unshuffle_wands+1] = wand
+	end
+end
+
+afw_log( 'unshuffle wands', #afw_unshuffle_wands, #wands )
