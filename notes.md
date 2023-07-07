@@ -1,5 +1,5 @@
 - x debug prints
-- debug names
+- x debug names
 - force unshuffle
 - prerank wands for level based matching
 - settings

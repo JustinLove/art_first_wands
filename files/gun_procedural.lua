@@ -136,15 +136,17 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 		table.remove(variables_03)
 	end
 
-	local entity_id = GetUpdatedEntityID()
-	local item = EntityGetFirstComponent( entity_id, "ItemComponent" )
-	if item then
-		local rare = ''
-		if gun["is_rare"] == 1 then
-			rare = 'r'
+	if false then
+		local entity_id = GetUpdatedEntityID()
+		local item = EntityGetFirstComponent( entity_id, "ItemComponent" )
+		if item then
+			local rare = ''
+			if gun["is_rare"] == 1 then
+				rare = 'r'
+			end
+			ComponentSetValue2( item, "item_name", tostring(level) .. rare .. " " .. gun["cost"] )
+			ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 		end
-		ComponentSetValue2( item, "item_name", tostring(level) .. rare .. " " .. gun["cost"] )
-		ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 	end
 
 	--gun["cost"] = 0
