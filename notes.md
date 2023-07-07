@@ -7,7 +7,7 @@
 - settings
   - x ranked
   - x enforce min mana
-  - debug settings?
+  - x debug settings?
   - mana bias
 - steam image
 - readme

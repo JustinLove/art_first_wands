@@ -35,6 +35,29 @@ mod_settings =
 	},
 }
 
+if ModIsEnabled('EnableLogger') then
+	table.insert( mod_settings, {
+		category_id = "debugging",
+		ui_name = "Debugging",
+		settings = {
+			{
+				id = "wand_gen_logging",
+				ui_name = "Wand Gen Logging",
+				ui_description = "Spam the log as each wand is generated",
+				value_default = false,
+				scope = MOD_SETTING_SCOPE_RUNTIME,
+			},
+			{
+				id = "wand_names",
+				ui_name = "Wand Names",
+				ui_description = "Put some wand values in the wand name (at generation time)",
+				value_default = false,
+				scope = MOD_SETTING_SCOPE_RUNTIME,
+			},
+		},
+	})
+end
+
 function ModSettingsUpdate( init_scope )
 	local old_version = mod_settings_get_version( mod_id ) -- This can be used to migrate some settings between mod versions.
 	mod_settings_update( mod_id, mod_settings, init_scope )

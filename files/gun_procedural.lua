@@ -20,12 +20,12 @@ function afw_setup()
 
 		table.sort(wands, compare_wands)
 
-		--[[
-		for i = 1,#wands,100 do
-			print(i, wands[i].rating)
+		if ModSettingGet('art_first_wands.wand_gen_logging') then
+			for i = 1,#wands,100 do
+				print(i, wands[i].rating)
+			end
+			print(#wands, wands[#wands].rating)
 		end
-		print(#wands, wands[#wands].rating)
-		]]
 	end
 
 	for w = 1,#wands do
@@ -199,6 +199,8 @@ function afw_wand_stats()
 end
 
 function afw_art_first_wand( gun, level, variables_01, variables_02, variables_03, force_unshuffle )
+	afw_print_logs = ModIsEnabled('EnableLogger') and ModSettingGet('art_first_wands.wand_gen_logging')
+
 	if #afw_unshuffle_wands < 1 then
 		afw_setup()
 	end
@@ -240,7 +242,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 		table.remove(variables_03)
 	end
 
-	if false then
+	if ModSettingGet('art_first_wands.wand_names') then
 		local entity_id = GetUpdatedEntityID()
 		local item = EntityGetFirstComponent( entity_id, "ItemComponent" )
 		if item then
@@ -248,7 +250,11 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 			if gun["is_rare"] == 1 then
 				rare = 'r'
 			end
-			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", gun["cost"], string.format(" %0.2f", wand.rating) }) )
+			local rating = ''
+			if ModSettingGet('art_first_wands.bias_art_selection') then
+				rating = string.format(" %0.2f", wand.rating)
+			end
+			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", gun["cost"], rating }) )
 			ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 		end
 	end
