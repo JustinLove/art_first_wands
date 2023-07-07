@@ -1,4 +1,4 @@
-- debug prints
+- x debug prints
 - debug names
 - force unshuffle
 - prerank wands for level based matching
@@ -6,6 +6,9 @@
   - mana bias
   - enforce min mana
 - starting wands?
+- steam image
+- readme
+  - bbcode
 
 ### Other Mods
 - More Stuff has special wands

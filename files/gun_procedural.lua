@@ -5,7 +5,7 @@ function afw_gun_from_wand( t_gun, wand )
 	t_gun["fire_rate_wait"] = t_gun["fire_rate_wait"] + RandomDistribution( -10, 10, 0, 1)
 	t_gun["cost"] = t_gun["cost"] - ( 16 - t_gun["fire_rate_wait"] )
 	variable = "fire_rate_wait"
-	print( variable, t_gun[variable], t_gun['cost'] )
+	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	-- shuffle_deck_when_empty:   0  -  1 	/ 
 	t_gun["shuffle_deck_when_empty"] = wand["shuffle_deck_when_empty"]
@@ -21,7 +21,7 @@ function afw_gun_from_wand( t_gun, wand )
 		t_gun["cost"] = t_gun["cost"] - t_gun["actions_per_round"] * 5
 	end
 	variable = "shuffle_deck_when_empty"
-	print( variable, t_gun[variable], t_gun['cost'] )
+	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20 
 	--t_gun["deck_capacity"] = 3 * wand["deck_capacity"] + 3
@@ -33,7 +33,7 @@ function afw_gun_from_wand( t_gun, wand )
 		t_gun["cost"] = t_gun["cost"] - ((t_gun["deck_capacity"] - 6) * 5)
 	end
 	variable = "deck_capacity"
-	print( variable, t_gun[variable], t_gun['cost'], wand[variable] )
+	afw_log( variable, t_gun[variable], t_gun['cost'], wand[variable] )
 
 	-- actions_per_round:         0  -  2 	/  1 - 3	
 	local cap = t_gun['deck_capacity']
@@ -47,14 +47,14 @@ function afw_gun_from_wand( t_gun, wand )
 	end
 	t_gun["actions_per_round"] = math.floor(clamp(t_gun["actions_per_round"], 1, cap))
 	variable = "actions_per_round"
-	print( variable, t_gun[variable], t_gun['cost'], wand[variable] )
+	afw_log( variable, t_gun[variable], t_gun['cost'], wand[variable] )
 
 	-- spread_degrees:            0  -  2 	/ -5 - 10 / -35 - 35
 	t_gun["spread_degrees"] = 7 * wand["spread_degrees"] - 5
 	t_gun["spread_degrees"] = t_gun["spread_degrees"] + RandomDistribution( -7, 7, 0, 1)
 	t_gun["cost"] = t_gun["cost"] - math.floor( -0.1 *  t_gun["spread_degrees"] + -5 * math.atan( 0.3 * t_gun["spread_degrees"] ) )
 	variable = "spread_degrees"
-	print( variable, t_gun[variable], t_gun['cost'] )
+	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	-- reload_time:               0  -  2 	/ 5 - 100
 	local rel = wand["reload_time"]
@@ -67,18 +67,18 @@ function afw_gun_from_wand( t_gun, wand )
 	end
 	t_gun["cost"] = t_gun["cost"] - ( (60 - t_gun["reload_time"]) / 2 )
 	variable = "reload_time"
-	print( variable, t_gun[variable], t_gun['cost'] )
+	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	local probs = get_gun_probs( "speed_multiplier" )
 	t_gun["speed_multiplier"] = RandomDistributionf( probs.min, probs.max, probs.mean, probs.sharpness )
 	variable = "speed_multiplier"
-	print( variable, t_gun[variable], t_gun['cost'] )
+	afw_log( variable, t_gun[variable], t_gun['cost'] )
 end
 
 function afw_mana_sponge( t_gun )
 	local variable
 	local fraction = Random()
-	print( 'mana sponge in', t_gun['cost'] )
+	afw_log( 'mana sponge in', t_gun['cost'] )
 	local points = math.floor(t_gun["cost"] * fraction)
 	local offset = 50
 	if points < 0 then
@@ -89,14 +89,14 @@ function afw_mana_sponge( t_gun )
 		t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_charge_speed"]-offset) / 11 )
 	end
 	variable = "mana_charge_speed"
-	print( variable, t_gun[variable], t_gun['cost'] )
+	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	local points = t_gun["cost"]
 	local offset = 200
 	t_gun["mana_max"] = math.floor(clamp( offset + points*35, 50, 6000 ))
 	t_gun["cost"] = t_gun["cost"] - math.floor( (t_gun["mana_max"]-offset) / 35 )
 	variable = "mana_max"
-	print( 'mana_max       ', t_gun[variable], t_gun['cost'] )
+	afw_log( 'mana_max       ', t_gun[variable], t_gun['cost'] )
 end
 
 function afw_wand_stats()
@@ -112,19 +112,19 @@ function afw_wand_stats()
 		end
 	end
 	for i, var in ipairs(variables) do
-		print( var .. ": " .. stats[var].min .. "-" .. stats[var].max )
+		afw_log( var .. ": " .. stats[var].min .. "-" .. stats[var].max )
 	end
 end
 
 function afw_art_first_wand( gun, level, variables_01, variables_02, variables_03 )
 	local base_cost = gun['cost']
-	print( 'initial cost----', gun['cost'] )
+	afw_log( 'initial cost----', gun['cost'] )
 	local wand
 	wand = wands[Random(1, #wands)]
 	afw_gun_from_wand( gun, wand )
 	gun["cost"] = gun["cost"] * 0.3 + level * 9
 	afw_mana_sponge( gun, wand )
-	print( 'final cost', gun['cost'] )
+	afw_log( 'final cost', gun['cost'] )
 
 	while #variables_01 > 0 do
 		table.remove(variables_01)
@@ -150,4 +150,12 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	--gun["cost"] = 0
 	gun["wand"] = wand
 	return wand
+end
+
+local afw_print_logs = ModIsEnabled('EnableLogger')
+
+function afw_log( ... )
+	if afw_print_logs then
+		print( ... )
+	end
 end
