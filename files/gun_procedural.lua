@@ -39,66 +39,64 @@ function afw_setup()
 end
 
 function afw_rate_wand( wand )
-	local variable
-	local rating = 0
+	local gun = {}
+	afw_static_gun_from_wand( gun, wand )
+	wand.rating = afw_gun_cost( gun )
+end
+
+function afw_static_gun_from_wand( t_gun, wand )
+	-- shuffle_deck_when_empty:   0  -  1 	/
+	t_gun["shuffle_deck_when_empty"] = wand["shuffle_deck_when_empty"]
 
 	-- fire_rate_wait:            0  -  4   / 1 - 30 (50)
-	rating = rating + (wand["fire_rate_wait"] / 4) * -0.5
+	t_gun["fire_rate_wait"] = 10 * wand["fire_rate_wait"] - 10
 
-	-- shuffle_deck_when_empty(cost):   0  -  1 	/ 
-	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20 
-	local cap = math.floor(math.pow(0.68*wand["deck_capacity"], 2)) + 2
-	if( wand["shuffle_deck_when_empty"] == 0 ) then
-		rating = rating + (cap / 26) * 3.0
-	else
-		rating = rating + ((cap - 6) / 26) * 1.0
-	end
+	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20
+	--t_gun["deck_capacity"] = 3 * wand["deck_capacity"] + 3
+	local cap = wand["deck_capacity"] + 0.5
+	-- min: we'll probably get limited by vanilla code, so no point in paying points for extra slots we won't get.
+	t_gun["deck_capacity"] = math.min(26, math.floor(math.pow(0.68*cap, 2) + 2.5))
 
 	-- actions_per_round:         0  -  2 	/  1 - 3
-	rating = rating + (wand["actions_per_round"] / 2) * 0.5
+	local cap = t_gun['deck_capacity']
+	local actions = wand["actions_per_round"]
+	if actions == 0 then
+		t_gun["actions_per_round"] = 1
+	elseif actions == 1 then
+		t_gun["actions_per_round"] = 2
+	else
+		t_gun["actions_per_round"] = math.max(3, cap/2)
+	end
+	t_gun["actions_per_round"] = math.floor(clamp(t_gun["actions_per_round"], 1, cap))
 
 	-- spread_degrees:            0  -  2 	/ -5 - 10 / -35 - 35
-	rating = rating + (wand["spread_degrees"] / 7) * -0.5
+	t_gun["spread_degrees"] = 7 * wand["spread_degrees"] - 5
 
 	-- reload_time:               0  -  2 	/ 5 - 100
-	rating = rating + (wand["reload_time"] / 2) * -1.0
 	local rel = wand["reload_time"]
 	if rel == 0 then
-		rating = rating + 0.5
+		t_gun["reload_time"] = 10
 	elseif rel == 1 then
-		rating = rating + -0.5
+		t_gun["reload_time"] = 45
 	else
-		rating = rating + -2.0
+		t_gun["reload_time"] = 120
 	end
 
-	wand.rating = rating
-	return rating
+	t_gun["speed_multiplier"] = 1.0
 end
 
 function afw_gun_from_wand( t_gun, wand )
-	local variable
-
-	-- other cost calculations depend on this
-	-- shuffle_deck_when_empty(value):   0  -  1 	/ 
+	-- shuffle_deck_when_empty:   0  -  1 	/
 	t_gun["shuffle_deck_when_empty"] = wand["shuffle_deck_when_empty"]
+
 	-- fire_rate_wait:            0  -  4   / 1 - 30 (50)
 	t_gun["fire_rate_wait"] = 10 * wand["fire_rate_wait"] - 10
 	t_gun["fire_rate_wait"] = t_gun["fire_rate_wait"] + RandomDistribution( -10, 10, 0, 1)
-	t_gun["cost"] = t_gun["cost"] - ( 16 - t_gun["fire_rate_wait"] )
-	variable = "fire_rate_wait"
-	afw_log( variable, t_gun[variable], t_gun['cost'] )
-
-	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20 
+	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20
 	--t_gun["deck_capacity"] = 3 * wand["deck_capacity"] + 3
 	local cap = wand["deck_capacity"] + RandomDistributionf( 0, 1, 0.5, 0)
-	t_gun["deck_capacity"] = math.floor(math.pow(0.68*cap, 2)) + 2
-	if( t_gun["shuffle_deck_when_empty"] == 0 ) then
-		t_gun["cost"] = t_gun["cost"] - ((t_gun["deck_capacity"] - 0) * 10)
-	else
-		t_gun["cost"] = t_gun["cost"] - ((t_gun["deck_capacity"] - 6) * 5)
-	end
-	variable = "deck_capacity"
-	afw_log( variable, t_gun[variable], t_gun['cost'], wand[variable] )
+	-- min: we'll probably get limited by vanilla code, so no point in paying points for extra slots we won't get.
+	t_gun["deck_capacity"] = math.min(26, math.floor(math.pow(0.68*cap, 2) + 2.5))
 
 	-- actions_per_round:         0  -  2 	/  1 - 3
 	local cap = t_gun['deck_capacity']
@@ -111,30 +109,10 @@ function afw_gun_from_wand( t_gun, wand )
 		t_gun["actions_per_round"] = RandomDistribution( 3, cap, cap/2, 2)
 	end
 	t_gun["actions_per_round"] = math.floor(clamp(t_gun["actions_per_round"], 1, cap))
-	variable = "actions_per_round"
-	afw_log( variable, t_gun[variable], t_gun['cost'], wand[variable] )
-
-	-- shuffle_deck_when_empty(cost):   0  -  1 	/ 
-	if( t_gun["shuffle_deck_when_empty"] == 1 ) then
-		if( t_gun["actions_per_round"] < 2 ) then
-			t_gun["cost"] = t_gun["cost"] + 60
-		else
-			t_gun["cost"] = t_gun["cost"] + 30
-			t_gun["cost"] = t_gun["cost"] - t_gun["actions_per_round"] * 10
-		end
-	else
-		-- cost is paid in increased slot cost
-		t_gun["cost"] = t_gun["cost"] - t_gun["actions_per_round"] * 5
-	end
-	variable = "shuffle_deck_when_empty"
-	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	-- spread_degrees:            0  -  2 	/ -5 - 10 / -35 - 35
 	t_gun["spread_degrees"] = 7 * wand["spread_degrees"] - 5
 	t_gun["spread_degrees"] = t_gun["spread_degrees"] + RandomDistribution( -7, 7, 0, 1)
-	t_gun["cost"] = t_gun["cost"] - math.floor( -0.1 *  t_gun["spread_degrees"] + -5 * math.atan( 0.3 * t_gun["spread_degrees"] ) )
-	variable = "spread_degrees"
-	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	-- reload_time:               0  -  2 	/ 5 - 100
 	local rel = wand["reload_time"]
@@ -145,14 +123,66 @@ function afw_gun_from_wand( t_gun, wand )
 	else
 		t_gun["reload_time"] = RandomDistribution( 60, 240, 120, 1)
 	end
-	t_gun["cost"] = t_gun["cost"] - ( (60 - t_gun["reload_time"]) / 2 )
-	variable = "reload_time"
-	afw_log( variable, t_gun[variable], t_gun['cost'] )
 
 	local probs = get_gun_probs( "speed_multiplier" )
 	t_gun["speed_multiplier"] = RandomDistributionf( probs.min, probs.max, probs.mean, probs.sharpness )
+end
+
+function afw_gun_cost( t_gun )
+	local variable
+	local cost
+	local total_cost = 0
+
+	-- shuffle_deck_when_empty(cost):   0  -  1 	/
+	-- cost is paid in increased slot cost
+	if( t_gun["shuffle_deck_when_empty"] == 1 ) then
+		if( t_gun["actions_per_round"] < 2 ) then
+			cost = -45
+		else
+			cost = -15
+		end
+	else
+		cost = 15 + ((t_gun["deck_capacity"] - 0) * 5)
+	end
+	total_cost = total_cost + cost
+	variable = "shuffle_deck_when_empty"
+	afw_log( variable, t_gun[variable], cost )
+
+	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20
+	cost = ((t_gun["deck_capacity"] - 6) * 5)
+	total_cost = total_cost + cost
+	variable = "deck_capacity"
+	afw_log( variable, t_gun[variable], cost )
+
+	-- actions_per_round:         0  -  2 	/  1 - 3
+	cost = t_gun["actions_per_round"]
+	total_cost = total_cost + cost
+	variable = "actions_per_round"
+	afw_log( variable, t_gun[variable], cost )
+
+	-- fire_rate_wait:            0  -  4   / 1 - 30 (50)
+	cost = ( 16 - t_gun["fire_rate_wait"] )
+	total_cost = total_cost + cost
+	variable = "fire_rate_wait"
+	afw_log( variable, t_gun[variable], cost )
+
+	-- reload_time:               0  -  2 	/ 5 - 100
+	cost = ( (60 - t_gun["reload_time"]) / 2 )
+	total_cost = total_cost + cost
+	variable = "reload_time"
+	afw_log( variable, t_gun[variable], cost )
+
+	-- spread_degrees:            0  -  2 	/ -5 - 10 / -35 - 35
+	cost = math.floor( -0.1 *  t_gun["spread_degrees"] + -5 * math.atan( 0.3 * t_gun["spread_degrees"] ) )
+	total_cost = total_cost + cost
+	variable = "spread_degrees"
+	afw_log( variable, t_gun[variable], cost )
+
+
 	variable = "speed_multiplier"
-	afw_log( variable, t_gun[variable], t_gun['cost'] )
+	afw_log( variable, t_gun[variable], 0 )
+
+	return math.floor(total_cost)
 end
 
 function afw_mana_sponge( t_gun )
@@ -198,37 +228,41 @@ function afw_wand_stats()
 	end
 end
 
-function afw_art_first_wand( gun, level, variables_01, variables_02, variables_03, force_unshuffle )
-	afw_print_logs = ModIsEnabled('EnableLogger') and ModSettingGet('art_first_wands.wand_gen_logging')
-
-	if #afw_unshuffle_wands < 1 then
-		afw_setup()
-	end
+function afw_pick_wand( base_cost, force_unshuffle )
 	if GlobalsGetValue( "PERK_NO_MORE_SHUFFLE_WANDS", "0" ) == "1" then
 		force_unshuffle = true
 	end
-	local base_cost = gun['cost']
-	afw_log( 'initial cost----', base_cost)
-	local wand
 	if ModSettingGet('art_first_wands.bias_art_selection') then
 		local selectionValue = math.min(1.0, (base_cost - 30) / 90)
 		if force_unshuffle then
 			local i = RandomDistribution( 1, #afw_unshuffle_wands, #afw_unshuffle_wands*selectionValue, 2)
-			wand = afw_unshuffle_wands[i]
+			return afw_unshuffle_wands[i]
 		else
 			local i = RandomDistribution( 1, #wands, #wands*selectionValue, 2)
-			wand = wands[i]
+			return wands[i]
 		end
 	else
 		if force_unshuffle then
-			wand = afw_unshuffle_wands[Random(1, #afw_unshuffle_wands)]
+			return afw_unshuffle_wands[Random(1, #afw_unshuffle_wands)]
 		else
-			wand = wands[Random(1, #wands)]
+			return wands[Random(1, #wands)]
 		end
 	end
+end
+
+function afw_art_first_wand( gun, level, variables_01, variables_02, variables_03, force_unshuffle )
+	if #afw_unshuffle_wands < 1 then
+		afw_print_logs = false
+		afw_setup()
+	end
+	afw_print_logs = ModIsEnabled('EnableLogger') and ModSettingGet('art_first_wands.wand_gen_logging')
+	local base_cost = gun['cost']
+	afw_log( 'initial cost----', base_cost)
+	local wand = afw_pick_wand( base_cost, force_unshuffle )
 
 	afw_gun_from_wand( gun, wand )
-	local art_cost = math.floor(gun["cost"])
+	local art_cost = afw_gun_cost( gun )
+	gun["cost"] = gun["cost"] - art_cost
 	gun["cost"] = math.floor( gun["cost"] * 0.3 + level * 9 )
 	local mana_setup = gun["cost"]
 	afw_mana_sponge( gun, wand )
@@ -255,7 +289,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 			end
 			local rating = ''
 			if ModSettingGet('art_first_wands.bias_art_selection') then
-				rating = string.format(" %0.2f", wand.rating)
+				rating = wand.rating
 			end
 			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", base_cost, " ", art_cost, " ", mana_setup, " ", final_cost, " ", rating }) )
 			--ComponentSetValue2( item, "item_name", table.concat({'Level ', tostring(level), rare }) )
