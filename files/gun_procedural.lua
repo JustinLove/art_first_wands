@@ -136,38 +136,39 @@ function afw_gun_cost( t_gun )
 	-- shuffle_deck_when_empty(cost):   0  -  1 	/
 	-- cost is paid in increased slot cost
 	if( t_gun["shuffle_deck_when_empty"] == 1 ) then
+		cost = 0
 		if( t_gun["actions_per_round"] < 2 ) then
-			cost = -45
+			--cost = -45
 		else
-			cost = -15
+			--cost = -15
 		end
 	else
-		cost = 15 + ((t_gun["deck_capacity"] - 0) * 5)
+		cost = 15 + ((t_gun["deck_capacity"] - 0) * 4)
 	end
 	total_cost = total_cost + cost
 	variable = "shuffle_deck_when_empty"
 	afw_log( variable, t_gun[variable], cost )
 
 	-- deck_capacity:             0  -  7 	/ 3 - 10 / 20
-	cost = ((t_gun["deck_capacity"] - 6) * 5)
+	cost = ((t_gun["deck_capacity"] - 6) * 4)
 	total_cost = total_cost + cost
 	variable = "deck_capacity"
 	afw_log( variable, t_gun[variable], cost )
 
 	-- actions_per_round:         0  -  2 	/  1 - 3
-	cost = t_gun["actions_per_round"]
+	cost = t_gun["actions_per_round"] * 2
 	total_cost = total_cost + cost
 	variable = "actions_per_round"
 	afw_log( variable, t_gun[variable], cost )
 
 	-- fire_rate_wait:            0  -  4   / 1 - 30 (50)
-	cost = ( 16 - t_gun["fire_rate_wait"] )
+	cost = math.floor( 16 - t_gun["fire_rate_wait"] )
 	total_cost = total_cost + cost
 	variable = "fire_rate_wait"
 	afw_log( variable, t_gun[variable], cost )
 
 	-- reload_time:               0  -  2 	/ 5 - 100
-	cost = ( (60 - t_gun["reload_time"]) / 2 )
+	cost = math.floor( (60 - t_gun["reload_time"]) / 2 )
 	total_cost = total_cost + cost
 	variable = "reload_time"
 	afw_log( variable, t_gun[variable], cost )
