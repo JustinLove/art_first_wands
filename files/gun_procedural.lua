@@ -292,7 +292,7 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 			if ModSettingGet('art_first_wands.bias_art_selection') then
 				rating = wand.rating
 			end
-			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, " ", base_cost, " ", art_cost, " ", mana_setup, " ", final_cost, " ", rating }) )
+			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, base_cost, rating, art_cost, mana_setup, final_cost }, ' ') )
 			--ComponentSetValue2( item, "item_name", table.concat({'Level ', tostring(level), rare }) )
 			ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 		end

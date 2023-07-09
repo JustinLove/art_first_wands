@@ -11,7 +11,8 @@ function OnPlayerSpawned( player_entity ) -- This runs when player entity has be
 	afw_test( player_entity )
 end
 
-function OnMagicNumbersAndWorldSeedInitialized() -- this is the last point where the Mod* API is available. after this materials.xml will be loaded.
+
+function OnModInit()
 	afw_edit_files()
 end
 

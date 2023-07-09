@@ -12,6 +12,15 @@
 - x steam image
 - x readme
 - starting wands?
+- use point difference to direct stats random range
+- try thinking of mana in terms of things like
+  - effective mana/shot
+  - time to recharge
+  - ratio the wand would natuarlly have based on speed stats, and perhaps skewing that as a quality lever other than pure quantity
+- other recharge options
+  - spell refresh
+  - immersion in mana
+  - how does kills to mana work with low charge wands?
 
 ### Other Mods
 - More Stuff has special wands
