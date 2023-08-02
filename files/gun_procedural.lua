@@ -263,6 +263,9 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 
 	afw_gun_from_wand( gun, wand )
 	local art_cost = afw_gun_cost( gun )
+	if force_unshuffle then
+		gun["cost"] = gun["cost"] + 40 -- unshuffle wands are typically spawned at two levels lower
+	end
 	gun["cost"] = gun["cost"] - art_cost
 	gun["cost"] = math.floor( gun["cost"] * 0.3 + level * 9 )
 	local mana_setup = gun["cost"]

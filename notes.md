@@ -1,17 +1,6 @@
-- x debug prints
-- x debug names
-- x force unshuffle
-- x prerank wands for level based matching
-- x lazy sorting
-- x cost instead of level?
-- settings
-  - x ranked
-  - x enforce min mana
-  - x debug settings?
-  - mana bias
-- x steam image
-- x readme
 - starting wands?
+- x random buff to unshuffle
+- consider the average art point value at typical wand point levels
 - use point difference to direct stats random range
 - try thinking of mana in terms of things like
   - effective mana/shot
