@@ -21,6 +21,30 @@ local function test_wands( wands )
 	end
 end
 
+local function test_wands_level_1()
+	test_wands({
+		"data/entities/items/wand_level_01.xml",
+		"data/entities/items/wand_level_01.xml",
+		"data/entities/items/wand_level_01.xml",
+		"data/entities/items/wand_level_01.xml",
+		"data/entities/items/wand_level_01.xml",
+		"data/entities/items/wand_level_01.xml",
+		"data/entities/items/wand_level_01.xml",
+	})
+end
+
+local function test_wands_level_6()
+	test_wands({
+		"data/entities/items/wand_level_06.xml",
+		"data/entities/items/wand_level_06.xml",
+		"data/entities/items/wand_level_06.xml",
+		"data/entities/items/wand_level_06.xml",
+		"data/entities/items/wand_level_06.xml",
+		"data/entities/items/wand_level_06.xml",
+		"data/entities/items/wand_level_06.xml",
+	})
+end
+
 local function test_wands_level()
 	test_wands({
 		"data/entities/items/wand_level_01.xml",
@@ -59,6 +83,7 @@ end
 function afw_test( player_entity )
 	--EntitySetTransform( player_entity, 1540, 6050 )
 	--local x, y = EntityGetTransform( player_entity )
+	--test_wands_level_6()
 	--test_wands_level()
 	--test_wands_unshuffle()
 	--test_wands_better()

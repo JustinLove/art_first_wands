@@ -8,6 +8,17 @@ end
 
 afw_unshuffle_wands = {}
 
+local function art_cost_at_cost(base_cost, force_unshuffle)
+	local selectionValue = math.min(1.0, (base_cost - 20) / 120)
+	if force_unshuffle then
+		local i = math.max(1, math.min(#afw_unshuffle_wands, math.floor(#afw_unshuffle_wands*selectionValue)))
+		return afw_unshuffle_wands[i]
+	else
+		local i = math.max(1, math.min(#wands, math.floor(#wands*selectionValue)))
+		return wands[i]
+	end
+end
+
 function afw_setup()
 	if ModSettingGet('art_first_wands.bias_art_selection') then
 		for w = 1,#wands do
@@ -36,6 +47,20 @@ function afw_setup()
 	end
 
 	afw_log( 'unshuffle wands', #afw_unshuffle_wands, #wands )
+
+	if ModSettingGet('art_first_wands.wand_gen_logging') then
+		local points = {30,40,60,80,100,120,200}
+		for i = 1,#points do
+			local p = points[i]
+			local base = art_cost_at_cost(p, false)
+			local unshuffle = art_cost_at_cost(p, true)
+			print(p, base.rating, unshuffle.rating)
+			p = p + 65
+			base = art_cost_at_cost(p, false)
+			unshuffle = art_cost_at_cost(p, true)
+			print(p, base.rating, unshuffle.rating)
+		end
+	end
 end
 
 function afw_rate_wand( wand )
@@ -234,7 +259,7 @@ function afw_pick_wand( base_cost, force_unshuffle )
 		force_unshuffle = true
 	end
 	if ModSettingGet('art_first_wands.bias_art_selection') then
-		local selectionValue = math.min(1.0, (base_cost - 30) / 90)
+		local selectionValue = math.min(1.0, (base_cost - 20) / 120)
 		if force_unshuffle then
 			local i = RandomDistribution( 1, #afw_unshuffle_wands, #afw_unshuffle_wands*selectionValue, 2)
 			return afw_unshuffle_wands[i]
