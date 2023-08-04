@@ -1,7 +1,7 @@
 - starting wands?
 - x random buff to unshuffle
 - x consider the average art point value at typical wand point levels
-- use point difference to direct stats random range
+- x use point difference to direct stats random range
 - try thinking of mana in terms of things like
   - effective mana/shot
   - time to recharge
