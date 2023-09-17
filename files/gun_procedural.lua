@@ -284,6 +284,9 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 		afw_setup()
 	end
 	afw_print_logs = ModIsEnabled('EnableLogger') and ModSettingGet('art_first_wands.wand_gen_logging')
+	if force_unshuffle then
+		gun["cost"] = gun["cost"] + 40 -- unshuffle wands are typically spawned at two levels lower
+	end
 	local base_cost = gun['cost']
 	afw_log( 'initial cost----', base_cost)
 	local wand = afw_pick_wand( base_cost, force_unshuffle )
@@ -294,9 +297,6 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 	local net = gun["cost"] - wand.rating
 	afw_gun_from_wand( gun, wand, net )
 	local art_cost = afw_gun_cost( gun )
-	if force_unshuffle then
-		gun["cost"] = gun["cost"] + 40 -- unshuffle wands are typically spawned at two levels lower
-	end
 	gun["cost"] = gun["cost"] - art_cost
 	gun["cost"] = math.floor( gun["cost"] * 0.3 + level * 9 )
 	local mana_setup = gun["cost"]
@@ -322,12 +322,15 @@ function afw_art_first_wand( gun, level, variables_01, variables_02, variables_0
 			if gun["is_rare"] == 1 then
 				rare = 'r'
 			end
+			local unshuf = ''
+			if force_unshuffle then
+				unshuf = 'u'
+			end
 			local rating = ''
 			if ModSettingGet('art_first_wands.bias_art_selection') then
 				rating = wand.rating
 			end
-			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, base_cost, rating, art_cost, mana_setup, final_cost }, ' ') )
-			--ComponentSetValue2( item, "item_name", table.concat({'Level ', tostring(level), rare }) )
+			ComponentSetValue2( item, "item_name", table.concat({tostring(level), rare, unshuf, base_cost, rating, art_cost, mana_setup, final_cost }, ' ') )
 			ComponentSetValue2( item, "always_use_item_name_in_ui", true )
 		end
 	end
